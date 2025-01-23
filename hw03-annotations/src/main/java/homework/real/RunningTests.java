@@ -1,5 +1,8 @@
 package homework.real;
 
+import homework.annotation.After;
+import homework.annotation.Before;
+import homework.annotation.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,29 +66,22 @@ public class RunningTests {
         }
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        Set<String> testClasses = Set.of("homework.SomeClassTestOne", "homework.SomeClassTestTwo");
-        RunningTests rt = new RunningTests(testClasses);
-
-        LOGGER.info("Begin execution TESTS!");
-        rt.run();
-        LOGGER.info("End execution TESTS!");
-    }
-
-    private void run() throws ClassNotFoundException {
+    public void run() throws ClassNotFoundException {
         List<TestStatistics> statistics = new ArrayList<>();
         for (String name : testClasses) {
             List<Method> methodsBefore = new ArrayList<>();
-            Deque<Method> methodsTest = new LinkedList<>();
+            List<Method> methodsTest = new LinkedList<>();
             List<Method> methodsAfter = new ArrayList<>();
 
             Class<?> clazz = Class.forName(name);
             Arrays.stream(clazz.getDeclaredMethods()).forEach(method -> {
                 Arrays.stream(method.getDeclaredAnnotations()).forEach(a -> {
-                    switch (a.annotationType().getSimpleName()) {
-                        case "Before" -> methodsBefore.add(method);
-                        case "Test" -> methodsTest.add(method);
-                        case "After" -> methodsAfter.add(method);
+                    if (Before.class.equals(a.annotationType())) {
+                        methodsBefore.add(method);
+                    } else if (Test.class.equals(a.annotationType())) {
+                        methodsTest.add(method);
+                    } else if (After.class.equals(a.annotationType())) {
+                        methodsAfter.add(method);
                     }
                 });
             });
@@ -97,19 +93,30 @@ public class RunningTests {
         statistics.stream().reduce(new TestStatistics("ALL TESTS"), TestStatistics::accumulator).printStat();
     }
 
-    private TestStatistics runTests(String name, List<Method> methodsBefore, Deque<Method> methodsTest, List<Method> methodsAfter) throws ClassNotFoundException {
+    private TestStatistics runTests(String name, List<Method> methodsBefore, List<Method> methodsTest, List<Method> methodsAfter) throws ClassNotFoundException {
         TestStatistics stat = new TestStatistics(name);
         Class<?> clazz = Class.forName(name);
-        while (!methodsTest.isEmpty()) {
-            Method test = methodsTest.poll();
+        for (Method test: methodsTest) {
             stat.incrementTotalTests();
 
             try {
                 var obj = clazz.getConstructor().newInstance();
 
-                methodsBefore.forEach(method -> runMethod(method, obj));
-                runMethod(test, obj);
+                boolean beforeIsDone = false;
+                for (Method method1 : methodsBefore) {
+                    beforeIsDone = runMethod(method1, obj);
+                }
+
+                var isDone = false;
+                if (beforeIsDone) {
+                    isDone = runMethod(test, obj);
+                }
+
                 methodsAfter.forEach(method -> runMethod(method, obj));
+
+                if (!isDone) {
+                    throw new Exception();
+                }
 
                 stat.incrementGoodTests();
                 LOGGER.info("Class {} Test {} is DONE!", name, test.getName());
@@ -121,12 +128,14 @@ public class RunningTests {
         return stat;
     }
 
-    private static void runMethod(Method method, Object obj) {
+    private static boolean runMethod(Method method, Object obj) {
         try {
             method.setAccessible(true);
             method.invoke(obj);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("", e);
+            return false;
         }
+        return true;
     }
 }

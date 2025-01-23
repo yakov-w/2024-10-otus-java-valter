@@ -15,6 +15,7 @@ public class SomeClassTestTwo {
     void before() {
         LOGGER.info("@Before. ");
         LOGGER.info("Экземпляр тестового класса: {}", Integer.toHexString(hashCode()));
+//        throw new IllegalStateException("error in before");
     }
 
     @After
