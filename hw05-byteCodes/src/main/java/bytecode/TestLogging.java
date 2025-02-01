@@ -19,7 +19,13 @@ public class TestLogging implements TestLoggingInterface {
     }
 
     @Log
+    @Override
     public void calculation(int param, String mes) {
         LOGGER.info("{} - {}", mes, param);
+    }
+
+    @Override
+    public void calculation(String mes, String mes2) {
+        LOGGER.info("{} - {}", mes, mes2);
     }
 }

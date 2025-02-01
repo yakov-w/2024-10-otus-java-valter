@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Ioc {
     private static final Logger LOGGER = LoggerFactory.getLogger(Ioc.class);
@@ -20,18 +23,21 @@ public class Ioc {
     }
 
     static class DemoInvocationHandler implements InvocationHandler {
-        private final TestLoggingInterface myClass;
+        private final Object myClass;
+        private final Set<String> methods;
 
-        DemoInvocationHandler(TestLoggingInterface myClass) {
+        DemoInvocationHandler(Object myClass) {
             this.myClass = myClass;
+            methods = Arrays.stream(myClass.getClass().getDeclaredMethods())
+                    .filter(method -> method.isAnnotationPresent(Log.class))
+                    .map(DemoInvocationHandler::methodToString)
+                    .collect(Collectors.toSet());
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            var isLogAnnotation = myClass.getClass().getDeclaredMethod(method.getName(), method.getParameterTypes()).isAnnotationPresent(Log.class);
-            if (args.length == 1 && args[0] instanceof Integer && isLogAnnotation) {
-//            if ( isLogAnnotation) {
-                LOGGER.info("executed method: calculation, param: {}", args[0]);
+            if (methods.contains(methodToString(method))) {
+                LOGGER.info("executed method: calculation, param: {}", Arrays.toString(args));
             }
             return method.invoke(myClass, args);
         }
@@ -39,6 +45,10 @@ public class Ioc {
         @Override
         public String toString() {
             return "DemoInvocationHandler{" + "myClass=" + myClass + '}';
+        }
+
+        private static String methodToString(Method m) {
+            return m.getName() + ", " + Arrays.toString(m.getParameters()) + ", " + m.getReturnType();
         }
     }
 }
