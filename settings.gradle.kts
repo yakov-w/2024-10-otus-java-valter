@@ -4,6 +4,11 @@ include("hw02-generics")
 include("hw03-annotations")
 include("hw04-gc")
 
+
+
+
+include("hw09-jdbc")
+
 pluginManagement {
     val jgitver: String by settings
     val dependencyManagement: String by settings
@@ -25,4 +30,3 @@ pluginManagement {
         id("com.diffplug.spotless") version spotless
     }
 }
-include("hw07-jdbc")
