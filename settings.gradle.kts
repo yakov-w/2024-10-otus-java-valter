@@ -7,6 +7,11 @@ include("hw05-byteCodes")
 
 include("hw06-solid")
 
+
+
+
+include("hw09-jdbc")
+
 pluginManagement {
     val jgitver: String by settings
     val dependencyManagement: String by settings
