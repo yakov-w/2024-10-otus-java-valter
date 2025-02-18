@@ -8,13 +8,14 @@ import ru.otus.model.Message;
 import ru.otus.processor.ProcessorSwitcherField11AndField12;
 import ru.otus.processor.ProcessorThrowExceptionOnEvenSecond;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class HomeWork {
     private static final Logger logger = LoggerFactory.getLogger(HomeWork.class);
 
     public static void main(String[] args) {
-        var processors = List.of(new ProcessorSwitcherField11AndField12(), new ProcessorThrowExceptionOnEvenSecond());
+        var processors = List.of(new ProcessorSwitcherField11AndField12(), new ProcessorThrowExceptionOnEvenSecond(LocalDateTime.now()));
 
         var complexProcessor = new ComplexProcessor(processors, ex -> {
         });
