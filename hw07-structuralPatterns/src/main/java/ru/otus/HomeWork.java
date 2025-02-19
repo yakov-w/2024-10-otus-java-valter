@@ -15,7 +15,7 @@ public class HomeWork {
     private static final Logger logger = LoggerFactory.getLogger(HomeWork.class);
 
     public static void main(String[] args) {
-        var processors = List.of(new ProcessorSwitcherField11AndField12(), new ProcessorThrowExceptionOnEvenSecond(LocalDateTime.now()));
+        var processors = List.of(new ProcessorSwitcherField11AndField12(), new ProcessorThrowExceptionOnEvenSecond(LocalDateTime::now));
 
         var complexProcessor = new ComplexProcessor(processors, ex -> {
         });
