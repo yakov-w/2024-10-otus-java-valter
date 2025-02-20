@@ -46,7 +46,7 @@ public class Client implements Cloneable {
     public <E> Client(Long id, String name, Address address, List<Phone> phones) {
         this(id,name);
         this.address = address;
-        this.phones = phones;
+        this.phones = List.copyOf(phones);
         for (Phone phone : this.phones) {
             phone.setClient(this);
         }
