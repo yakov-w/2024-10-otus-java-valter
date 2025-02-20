@@ -1,5 +1,6 @@
 package ru.otus.core.sessionmanager;
 
+import org.hibernate.CacheMode;
 import org.hibernate.SessionFactory;
 
 import java.util.concurrent.Callable;
@@ -24,6 +25,7 @@ public class TransactionManagerHibernate implements TransactionManager {
     private <T> T doInTransaction(TransactionAction<T> action, boolean readOnlyTran) {
         return wrapException(() -> {
             try (var session = sessionFactory.openSession()) {
+                session.setCacheMode(CacheMode.IGNORE);
                 if (readOnlyTran) {
                     session.setDefaultReadOnly(true);
                 }

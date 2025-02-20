@@ -48,7 +48,13 @@ public class DbServiceDemo {
                 .orElseThrow(() -> new RuntimeException("Client not found, id:" + clientSecondSelected.getId()));
         log.info("clientUpdated:{}", clientUpdated);
 
+        dbServiceClient.saveClient(new Client("dbService3"));
+
         log.info("All clients");
         dbServiceClient.findAll().forEach(client -> log.info("client:{}", client));
+
+        log.info(dbServiceClient.getClient(1L).orElseThrow(() -> new RuntimeException("Clients not found.")).toString());
+        log.info(dbServiceClient.getClient(2L).orElseThrow(() -> new RuntimeException("Clients not found.")).toString());
+        log.info(dbServiceClient.getClient(3L).orElseThrow(() -> new RuntimeException("Clients not found.")).toString());
     }
 }

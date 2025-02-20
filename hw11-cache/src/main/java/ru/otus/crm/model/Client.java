@@ -55,10 +55,12 @@ public class Client implements Cloneable {
     @SuppressWarnings({"java:S2975", "java:S1182"})
     public Client clone() {
         Client client = new Client(this.id, this.name);
-        client.setAddress(this.address.clone());
-        client.setPhones(this.phones.stream().map(Phone::clone).collect(Collectors.toList()));
-        for (Phone phone : client.getPhones()) {
-            phone.setClient(client);
+        if (this.address != null) client.setAddress(this.address.clone());
+        if (this.phones != null) {
+            client.setPhones(this.phones.stream().map(Phone::clone).collect(Collectors.toList()));
+            for (Phone phone : client.getPhones()) {
+                phone.setClient(client);
+            }
         }
         return client;
     }
