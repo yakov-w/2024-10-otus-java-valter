@@ -11,6 +11,11 @@ include("hw08-io")
 include("hw10-hibernate")
 
 
+
+
+
+include("hw09-jdbc")
+
 pluginManagement {
     val jgitver: String by settings
     val dependencyManagement: String by settings
