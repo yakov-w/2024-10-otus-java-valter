@@ -12,6 +12,10 @@ include("hw10-hibernate")
 include("hw11-cache")
 
 
+
+
+include("hw12-WebServer")
+
 pluginManagement {
     val jgitver: String by settings
     val dependencyManagement: String by settings
