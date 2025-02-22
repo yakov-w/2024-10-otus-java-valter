@@ -20,11 +20,12 @@ public class DbServiceClientImpl implements DBServiceClient {
     private final DataTemplate<Client> clientDataTemplate;
     private final TransactionManager transactionManager;
 
-    private final HwCache<String, Client> cache = new MyCache<>();
+    private final HwCache<String, Client> cache;
 
-    public DbServiceClientImpl(TransactionManager transactionManager, DataTemplate<Client> clientDataTemplate) {
+    public DbServiceClientImpl(TransactionManager transactionManager, DataTemplate<Client> clientDataTemplate, MyCache cache) {
         this.transactionManager = transactionManager;
         this.clientDataTemplate = clientDataTemplate;
+        this.cache = cache;
     }
 
     @Override
@@ -32,13 +33,15 @@ public class DbServiceClientImpl implements DBServiceClient {
         return transactionManager.doInTransaction(session -> {
             session.setCacheMode(CacheMode.IGNORE);
             var clientCloned = client.clone();
+            Client savedClient;
             if (client.getId() == null) {
-                var savedClient = clientDataTemplate.insert(session, clientCloned);
+                savedClient = clientDataTemplate.insert(session, clientCloned);
                 log.info("created client: {}", clientCloned);
-                return savedClient;
+            } else {
+                savedClient = clientDataTemplate.update(session, clientCloned);
+                log.info("updated client: {}", savedClient);
             }
-            var savedClient = clientDataTemplate.update(session, clientCloned);
-            log.info("updated client: {}", savedClient);
+            cache.put(savedClient.getId().toString(), savedClient);
             return savedClient;
         });
     }
