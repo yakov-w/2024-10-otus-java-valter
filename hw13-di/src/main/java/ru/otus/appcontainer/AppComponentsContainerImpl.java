@@ -15,66 +15,56 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
     private final Map<String, Object> appComponentsByName = new HashMap<>();
 
     public AppComponentsContainerImpl(Class<?> initialConfigClass) {
+        checkConfigClass(initialConfigClass);
         processConfig(initialConfigClass);
     }
 
-    private void processConfig(Class<?> configClass) {
-        checkConfigClass(configClass);
-        // You code here...
+    public AppComponentsContainerImpl(Class<?>... claszz) {
+        Arrays.stream(claszz).forEach(this::checkConfigClass);
+
+        Arrays.stream(claszz).sorted(Comparator.comparingInt(c -> c.getAnnotation(AppComponentsContainerConfig.class)
+                .order()));
+        Arrays.stream(claszz).forEach(this::processConfig);
     }
 
-    // Написать своего кода, чтобы приложение заработало.
-    private void checkConfigClass(Class<?> configClass) {
-        if (!configClass.isAnnotationPresent(AppComponentsContainerConfig.class)) {
-            throw new IllegalArgumentException(String.format("Given class is not config %s", configClass.getName()));
-        }
-
-        NavigableMap<Integer, List<Method>> methodss = getMethodss(configClass);
+    private void processConfig(Class<?> configClass) {
+        Method[] methods = Arrays.stream(configClass.getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(AppComponent.class))
+                .sorted(Comparator.comparingInt(
+                        m -> m.getAnnotation(AppComponent.class).order()))
+                .toArray(Method[]::new);
 
         try {
             Object instance = configClass.getConstructor().newInstance();
-            for (List<Method> methods : methodss.values()) {
-                for (Method method : methods) {
-                    Class<?> returnType = method.getReturnType();
-                    String name = method.getAnnotation(AppComponent.class).name();
-                    if (appComponentsByName.containsKey(name)) {
-                        throw new RuntimeException("В контексте не должно быть компонентов с одинаковым именем");
-                    }
-                    Parameter[] parameters = method.getParameters();
-                    Object[] args = new Object[parameters.length];
-                    for (int i = 0; i < parameters.length; i++) {
-                        Class<?> type = parameters[i].getType();
-                        Object o = appComponents.stream()
-                                .filter(type::isInstance)
-                                .findFirst()
-                                .get();
-                        args[i] = o;
-                    }
-                    Object o = returnType.cast(method.invoke(instance, args));
-                    appComponents.add(o);
-                    appComponentsByName.put(name, o);
+            for (Method method : methods) {
+                Class<?> returnType = method.getReturnType();
+                String name = method.getAnnotation(AppComponent.class).name();
+                if (appComponentsByName.containsKey(name)) {
+                    throw new RuntimeException("В контексте не должно быть компонентов с одинаковым именем");
                 }
+                Parameter[] parameters = method.getParameters();
+                Object[] args = new Object[parameters.length];
+                for (int i = 0; i < parameters.length; i++) {
+                    Class<?> type = parameters[i].getType();
+                    Object o = appComponents.stream()
+                            .filter(type::isInstance)
+                            .findFirst()
+                            .get();
+                    args[i] = o;
+                }
+                Object o = returnType.cast(method.invoke(instance, args));
+                appComponents.add(o);
+                appComponentsByName.put(name, o);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        System.out.println();
     }
 
-    private static NavigableMap<Integer, List<Method>> getMethodss(Class<?> configClass) {
-        NavigableMap<Integer, List<Method>> methodss = new TreeMap<>();
-
-        for (Method method : configClass.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(AppComponent.class)) {
-                int order = method.getAnnotation(AppComponent.class).order();
-                methodss.compute(order, (k, v) -> {
-                    v = Objects.isNull(v) ? new ArrayList<>() : v;
-                    v.add(method);
-                    return v;
-                });
-            }
+    private void checkConfigClass(Class<?> configClass) {
+        if (!configClass.isAnnotationPresent(AppComponentsContainerConfig.class)) {
+            throw new IllegalArgumentException(String.format("Given class is not config %s", configClass.getName()));
         }
-        return methodss;
     }
 
     @Override

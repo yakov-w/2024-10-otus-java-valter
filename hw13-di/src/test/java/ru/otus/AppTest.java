@@ -1,5 +1,12 @@
 package ru.otus;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+import java.io.PrintStream;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Scanner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,32 +17,24 @@ import ru.otus.appcontainer.api.AppComponentsContainerConfig;
 import ru.otus.config.AppConfig;
 import ru.otus.services.*;
 
-import java.io.PrintStream;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Scanner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-
 class AppTest {
 
     @DisplayName("Из контекста тремя способами должен корректно доставаться компонент с проставленными полями")
     @ParameterizedTest(name = "Достаем по: {0}")
     @CsvSource(
             value = {
-                    "GameProcessor, ru.otus.services.GameProcessor",
-                    "GameProcessorImpl, ru.otus.services.GameProcessor",
-                    "gameProcessor, ru.otus.services.GameProcessor",
-                    "IOService, ru.otus.services.IOService",
-                    "IOServiceStreams, ru.otus.services.IOService",
-                    "ioService, ru.otus.services.IOService",
-                    "PlayerService, ru.otus.services.PlayerService",
-                    "PlayerServiceImpl, ru.otus.services.PlayerService",
-                    "playerService, ru.otus.services.PlayerService",
-                    "EquationPreparer, ru.otus.services.EquationPreparer",
-                    "EquationPreparerImpl, ru.otus.services.EquationPreparer",
-                    "equationPreparer, ru.otus.services.EquationPreparer"
+                "GameProcessor, ru.otus.services.GameProcessor",
+                "GameProcessorImpl, ru.otus.services.GameProcessor",
+                "gameProcessor, ru.otus.services.GameProcessor",
+                "IOService, ru.otus.services.IOService",
+                "IOServiceStreams, ru.otus.services.IOService",
+                "ioService, ru.otus.services.IOService",
+                "PlayerService, ru.otus.services.PlayerService",
+                "PlayerServiceImpl, ru.otus.services.PlayerService",
+                "playerService, ru.otus.services.PlayerService",
+                "EquationPreparer, ru.otus.services.EquationPreparer",
+                "EquationPreparerImpl, ru.otus.services.EquationPreparer",
+                "equationPreparer, ru.otus.services.EquationPreparer"
             })
     void shouldExtractFromContextCorrectComponentWithNotNullFields(String classNameOrBeanId, Class<?> rootClass)
             throws Exception {
@@ -94,8 +93,7 @@ class AppTest {
 
     @AppComponentsContainerConfig(order = 1)
     public static class ConfigWithTwoComponentsWithSameName {
-        public ConfigWithTwoComponentsWithSameName() {
-        }
+        public ConfigWithTwoComponentsWithSameName() {}
 
         @AppComponent(order = 1, name = "equationPreparer")
         public EquationPreparer equationPreparer1() {
