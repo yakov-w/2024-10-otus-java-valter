@@ -5,11 +5,12 @@ include("hw03-annotations")
 include("hw04-gc")
 include("hw05-byteCodes")
 include("hw06-solid")
-
+include("hw07-structuralPatterns")
 include("hw08-io")
-
-
+include("hw09-jdbc")
+include("hw10-hibernate")
 include("hw11-cache")
+
 
 pluginManagement {
     val jgitver: String by settings
