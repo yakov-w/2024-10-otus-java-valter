@@ -3,6 +3,7 @@ package ru.otus.appcontainer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import org.reflections.Reflections;
 import ru.otus.appcontainer.api.AppComponent;
 import ru.otus.appcontainer.api.AppComponentsContainer;
 import ru.otus.appcontainer.api.AppComponentsContainerConfig;
@@ -24,6 +25,18 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
         Arrays.stream(claszz).sorted(Comparator.comparingInt(c -> c.getAnnotation(AppComponentsContainerConfig.class)
                 .order()));
+        Arrays.stream(claszz).forEach(this::processConfig);
+    }
+
+    public AppComponentsContainerImpl(String somePackage) {
+        Reflections reflections = new Reflections(somePackage);
+        Class<?>[] claszz = reflections.getTypesAnnotatedWith(AppComponentsContainerConfig.class).stream()
+                .filter(c ->
+                        !c.getName().equals("ru.otus.config.AppConfig")) // Это специально, что бы тесты не портились.
+                .sorted(Comparator.comparingInt(
+                        c -> c.getAnnotation(AppComponentsContainerConfig.class).order()))
+                .toArray(Class[]::new);
+
         Arrays.stream(claszz).forEach(this::processConfig);
     }
 
