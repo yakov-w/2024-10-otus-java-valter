@@ -14,6 +14,8 @@ include("hw12-WebServer")
 include("hw13-di")
 include("hw14-springDataJdbc")
 
+include("hw16-concurrentCollections")
+
 pluginManagement {
     val jgitver: String by settings
     val dependencyManagement: String by settings
