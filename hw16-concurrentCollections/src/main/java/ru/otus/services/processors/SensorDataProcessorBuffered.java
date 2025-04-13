@@ -17,7 +17,7 @@ public class SensorDataProcessorBuffered implements SensorDataProcessor {
 
     private final int bufferSize;
     private final SensorDataBufferedWriter writer;
-    BlockingQueue<SensorData> dataBuffer;
+    private BlockingQueue<SensorData> dataBuffer;
 
     public SensorDataProcessorBuffered(int bufferSize, SensorDataBufferedWriter writer) {
         this.bufferSize = bufferSize;
@@ -39,11 +39,11 @@ public class SensorDataProcessorBuffered implements SensorDataProcessor {
     // Смотреть на размер очереди не вариант т.к. метод может быть вызван в onProcessingEnd при "завершении" приложения,
     // а значит нужно обработать все что есть в очереди.
     // Тут вот какой вопрос: Как правильно разрешать такие ситуации?
-    public synchronized void flush() {
+    public void flush() {
         List<SensorData> bufferedData = new ArrayList<>();
 
         while (!dataBuffer.isEmpty()) {
-            bufferedData.add(dataBuffer.poll());
+            dataBuffer.drainTo(bufferedData);
         }
 
         if (bufferedData.isEmpty()) {
