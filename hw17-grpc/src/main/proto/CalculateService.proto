@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package ru.otus.protobuf;
+
+option java_multiple_files = true;
+
+message RangeMessage {
+    int64 begin = 1;
+    int64 end = 2;
+}
+
+message NumberMessage {
+    int64 id = 1;
+}
+
+message Empty {}
+
+service CalculateService {
+    rpc initRange(RangeMessage) returns (NumberMessage);
+    rpc getNumber(Empty) returns (stream NumberMessage);
+}
