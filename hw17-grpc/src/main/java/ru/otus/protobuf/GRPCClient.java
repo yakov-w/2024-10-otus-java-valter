@@ -48,13 +48,8 @@ public class GRPCClient {
         });
 
         long currentValue = 0L;
-        long prevVal = 0L;
         for (int i = 0; i < 50; i++) {
-            long tmp = serverVal.get();
-            if (prevVal != tmp) {
-                prevVal = tmp;
-                currentValue += prevVal;
-            }
+            currentValue += serverVal.getAndSet(0);
             log.info("currentValue:{}", ++currentValue);
             Thread.sleep(1000L);
         }
