@@ -5,6 +5,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,5 +34,11 @@ public class DataStoreR2dbc implements DataStore {
     public Flux<Message> loadMessages(String roomId) {
         log.info("loadMessages roomId:{}", roomId);
         return messageRepository.findByRoomId(roomId).delayElements(Duration.of(3, SECONDS), workerPool);
+    }
+
+    @Override
+    public Flux<Message> loadMessagesFromAllRooms() {
+        log.info("loadMessages all rooms");
+        return messageRepository.findAll(Sort.by("id").ascending()).delayElements(Duration.of(3, SECONDS), workerPool);
     }
 }
