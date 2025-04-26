@@ -21,8 +21,6 @@ public class DataController {
     private final DataStore dataStore;
     private final Scheduler workerPool;
 
-    private final String magicRoom = "1408";
-
     public DataController(DataStore dataStore, Scheduler workerPool) {
         this.dataStore = dataStore;
         this.workerPool = workerPool;
@@ -30,9 +28,6 @@ public class DataController {
 
     @PostMapping(value = "/msg/{roomId}")
     public Mono<Long> messageFromChat(@PathVariable("roomId") String roomId, @RequestBody MessageDto messageDto) {
-        if (magicRoom.equals(roomId)) {
-            return Mono.just(0L);
-        }
         var messageStr = messageDto.messageStr();
 
         var msgId = Mono.just(new Message(null, roomId, messageStr))
@@ -51,8 +46,17 @@ public class DataController {
     public Flux<MessageDto> getMessagesByRoomId(@PathVariable("roomId") String roomId) {
         return Mono.just(roomId)
                 .doOnNext(room -> log.info("getMessagesByRoomId, room:{}", room))
-                .flatMapMany(s ->
-                        magicRoom.equals(roomId) ? dataStore.loadMessagesFromAllRooms() : dataStore.loadMessages(s))
+                .flatMapMany(s -> dataStore.loadMessages(s))
+                .map(message -> new MessageDto(message.msgText()))
+                .doOnNext(msgDto -> log.info("msgDto:{}", msgDto))
+                .subscribeOn(workerPool);
+    }
+
+    @GetMapping(value = "/msg/", produces = MediaType.APPLICATION_NDJSON_VALUE)
+    public Flux<MessageDto> getMessagesByRoomId() {
+        return Mono.just("all")
+                .doOnNext(room -> log.info("getMessagesFromAllRooms"))
+                .flatMapMany(s -> dataStore.loadMessagesFromAllRooms())
                 .map(message -> new MessageDto(message.msgText()))
                 .doOnNext(msgDto -> log.info("msgDto:{}", msgDto))
                 .subscribeOn(workerPool);
