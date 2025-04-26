@@ -14,11 +14,10 @@ include("hw12-WebServer")
 include("hw13-di")
 include("hw14-springDataJdbc")
 include("hw15-executors")
-
 include("hw16-concurrentCollections")
-
-
 include("hw17-grpc")
+include("hw18-webflux-chat:client-service")
+include("hw18-webflux-chat:datastore-service")
 
 pluginManagement {
     val jgitver: String by settings
